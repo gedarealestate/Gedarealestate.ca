@@ -1,0 +1,22 @@
+# Geda Real Estate
+
+> Geda is a licensed real estate agent in Ontario, registered with Royal LePage First Contact in Barrie, helping clients buy, sell and lease homes across Barrie & Simcoe County.
+
+## Pages
+
+- [Home](https://gedarealestate.ca/#/home): Licensed real estate agent — buying, selling and leasing in Barrie & Simcoe County.
+- [Meet Geda](https://gedarealestate.ca/#/meet-geda): About Geda, licensed agent with Royal LePage First Contact.
+- [Buy & Sell](https://gedarealestate.ca/#/buy-sell): Buying, selling and leasing services, done personally.
+- [Home Evaluation](https://gedarealestate.ca/#/home-evaluation): Free home evaluation — no obligation, no instant online price estimate.
+- [Areas](https://gedarealestate.ca/#/areas): Barrie, Innisfil, Oro-Medonte, Orillia, Wasaga Beach, Springwater and Essa.
+- [How I Work](https://gedarealestate.ca/#/how-i-work): Four-step process and values — Love, On Fire, Excellence, Growth, Innovation, WOW.
+- [Contact](https://gedarealestate.ca/#/contact): Get in touch about buying, selling, leasing or a free home evaluation.
+
+## Business
+
+- Business: Geda Real Estate
+- Agent: Geda, Licensed Real Estate Agent, Ontario
+- Brokerage: Royal LePage First Contact, Barrie
+- Service area: Barrie, Innisfil, Oro-Medonte, Orillia, Wasaga Beach, Springwater, Essa
+- Services: Buying, selling, leasing, free home evaluations
+- Website: https://gedarealestate.ca
