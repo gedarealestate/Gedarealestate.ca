@@ -315,6 +315,9 @@
   .nl-error{display:none;margin:18px auto 0;max-width:520px;background:#FDF0F1;border:1px solid #F3C2C8;color:#8A0E20;padding:14px 16px;border-radius:2px;font-size:14px;line-height:1.6}
   @media(prefers-color-scheme:dark){.nl-error{background:#2A1114;color:#F3C2C8;border-color:#5C1D24}}
   .nl-thanks{display:none;font-family:"Playfair Display",Georgia,serif;font-size:23px;line-height:1.45;margin:28px auto 0;max-width:520px}
+  .nl-mode-toggle{margin:16px 0 0;text-align:center}
+  .nl-quiet-link{background:none;border:none;padding:4px 6px;font:inherit;font-size:13px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .nl-quiet-link:hover{color:var(--ink)}
 
   .cta-band{background:var(--red);color:#fff;text-align:center;padding:72px 24px}
   .cta-band h2{color:#fff;margin-bottom:12px}
@@ -480,8 +483,9 @@
         <form class="newsletter-form" id="subscribeForm">
           <input class="nl-name" id="nlFirstName" name="firstName" type="text" placeholder="First name (optional)" autocomplete="given-name" aria-label="First name (optional)">
           <input class="nl-email" id="nlEmail" name="email" type="email" required placeholder="Email address" autocomplete="email" aria-label="Email address">
-          <button type="submit" class="btn btn-red">Subscribe</button>
+          <button type="submit" class="btn btn-red" id="nlSubmitBtn">Subscribe</button>
         </form>
+        <p class="nl-mode-toggle" id="nlModeToggleWrap"><button type="button" class="nl-quiet-link" id="nlUnsubscribeToggle">Unsubscribe</button></p>
         <div class="nl-error" id="subscribeError" role="alert"></div>
         <p class="nl-thanks" id="subscribeThanks" role="status">Thank you — you're on the list. I'll be in touch with the latest news.</p>
       </div>
@@ -946,6 +950,11 @@
     if(submitBtn){ submitBtn.disabled=true; submitBtn.textContent='Sending…'; }
     box.style.display='block';
     box.innerHTML='<strong>Sending your message…</strong>';
+    fetch('/api/contact',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({name:name,email:email,interest:interest,message:msg})
+    }).catch(function(){});
     fetch('https://formsubmit.co/ajax/GedaRealEstate@RoyalLePage.ca',{
       method:'POST',
       headers:{'Content-Type':'application/json','Accept':'application/json'},
@@ -973,6 +982,24 @@
     });
   });
 
+  var nlMode='subscribe';
+  var nlToggle=document.getElementById('nlUnsubscribeToggle');
+  if(nlToggle){
+    nlToggle.addEventListener('click',function(){
+      nlMode='unsubscribe';
+      var firstNameField=document.getElementById('nlFirstName');
+      if(firstNameField){ firstNameField.style.display='none'; }
+      var submitBtn=document.getElementById('nlSubmitBtn');
+      if(submitBtn){ submitBtn.textContent='Unsubscribe'; }
+      var toggleWrap=document.getElementById('nlModeToggleWrap');
+      if(toggleWrap){ toggleWrap.style.display='none'; }
+      var errBox=document.getElementById('subscribeError');
+      if(errBox){ errBox.style.display='none'; }
+      var emailField=document.getElementById('nlEmail');
+      if(emailField){ emailField.focus(); }
+    });
+  }
+
   document.getElementById('subscribeForm').addEventListener('submit',function(e){
     e.preventDefault();
     var form=this;
@@ -985,12 +1012,37 @@
       errBox.textContent=msg;
     }
     if(!email || email.indexOf('@')<1 || email.indexOf('.')<0){
-      showError('Please add a valid email address so I can send you the news.');
+      showError(nlMode==='unsubscribe' ? 'Please add a valid email address to unsubscribe.' : 'Please add a valid email address so I can send you the news.');
       return;
     }
     errBox.style.display='none';
     var submitBtn=form.querySelector('button[type="submit"]');
     var originalBtnText=submitBtn ? submitBtn.textContent : '';
+
+    if(nlMode==='unsubscribe'){
+      if(submitBtn){ submitBtn.disabled=true; submitBtn.textContent='Unsubscribing…'; }
+      fetch('/api/unsubscribe',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify({email:email})
+      }).then(function(response){
+        if(!response.ok){ throw new Error('Unsubscribe failed'); }
+        return response.json().catch(function(){ return {}; });
+      }).then(function(){
+        form.style.display='none';
+        var toggleWrap=document.getElementById('nlModeToggleWrap');
+        if(toggleWrap){ toggleWrap.style.display='none'; }
+        errBox.style.display='none';
+        thanks.textContent="You've been unsubscribed. You won't receive further news from Geda Real Estate.";
+        thanks.style.display='block';
+      }).catch(function(){
+        showError('Sorry — something went wrong. Please try again in a moment.');
+      }).finally(function(){
+        if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent=originalBtnText; }
+      });
+      return;
+    }
+
     if(submitBtn){ submitBtn.disabled=true; submitBtn.textContent='Subscribing…'; }
     fetch('/api/subscribe',{
       method:'POST',
@@ -1001,6 +1053,8 @@
       return response.json().catch(function(){ return {}; });
     }).then(function(){
       form.style.display='none';
+      var toggleWrap2=document.getElementById('nlModeToggleWrap');
+      if(toggleWrap2){ toggleWrap2.style.display='none'; }
       errBox.style.display='none';
       thanks.style.display='block';
     }).catch(function(){
