@@ -752,7 +752,7 @@
           <form class="form" id="stayForm">
             <label for="name">Your name</label>
             <input id="name" name="name" required placeholder="e.g. Alex Smith" autocomplete="name">
-            <label for="email">Email (to include in your note)</label>
+            <label for="email">Email</label>
             <input id="email" name="email" type="email" required placeholder="you@example.com" autocomplete="email">
             <label for="interest">I'm interested in…</label>
             <select id="interest" name="interest">
@@ -766,14 +766,14 @@
             <label for="message">Message (optional)</label>
             <textarea id="message" name="message" placeholder="Tell me about your home, neighbourhood, or timeline."></textarea>
             <button type="submit" class="btn btn-red">Create My Message →</button>
-            <p class="fine">This form prepares your note below so you can copy it and paste it into an email or message to Geda — nothing is sent or stored by this page.</p>
+            <p class="fine">Your message goes straight to Geda's inbox — she'll reply personally.</p>
             <div class="success" id="successBox" role="status"></div>
           </form>
         </div>
       </div>
 
       <div class="faq">
-        <details open><summary>How quickly will I hear back? <span>+</span></summary><p>Copy your prepared note into an email or message to me, and I'll reply personally — usually the same or next business day.</p></details>
+        <details open><summary>How quickly will I hear back? <span>+</span></summary><p>Once you send the form, your message goes straight to my inbox, and I'll reply personally — usually the same or next business day.</p></details>
         <details><summary>Will I work with you directly? <span>+</span></summary><p>Yes. When specialists help — photography, staging, media — I bring them in for that part, but you'll always deal with me personally.</p></details>
         <details><summary>Is there any obligation? <span>+</span></summary><p>None at all. A first conversation is just that — information, honest answers, and space to decide.</p></details>
       </div>
@@ -898,6 +898,7 @@
 
   document.getElementById('stayForm').addEventListener('submit',function(e){
     e.preventDefault();
+    var form=this;
     var name=document.getElementById('name').value.trim();
     var email=document.getElementById('email').value.trim();
     var interest=document.getElementById('interest').value;
@@ -906,16 +907,40 @@
     function esc(s){ return s.replace(/</g,'&lt;'); }
     if(!name || !email || email.indexOf('@')<1){
       box.style.display='block';
-      box.innerHTML='<strong>One moment —</strong> please add your name and a valid email so your note is complete.';
+      box.innerHTML='<strong>One moment —</strong> please add your name and a valid email so your message is complete.';
       box.scrollIntoView({behavior:'smooth',block:'nearest'});
       return;
     }
-    var note='Hi Geda — I\'d like to get in touch about '+interest.toLowerCase()+' with Geda Real Estate.\n\nI understand you are a licensed real estate agent registered with Royal LePage First Contact Realty, Brokerage, helping clients buy, sell and lease in Barrie & Simcoe County, and I\'d like to discuss my plans.\n\nName: '+name+'\nEmail: '+email+'\nInterest: '+interest+(msg?'\nMessage: '+msg:'');
+    var submitBtn=form.querySelector('button[type="submit"]');
+    var originalBtnText=submitBtn ? submitBtn.textContent : '';
+    if(submitBtn){ submitBtn.disabled=true; submitBtn.textContent='Sending…'; }
     box.style.display='block';
-    box.innerHTML='<strong>✓ Your message is ready, '+esc(name.split(' ')[0])+'.</strong><br><br><span style="white-space:pre-wrap;word-break:break-word">'+esc(note)+'</span><br><br><button type="button" id="copyBtn" style="background:#111;color:#fff;border:0;padding:11px 16px;border-radius:999px;font-weight:700;cursor:pointer;font:inherit;font-size:13px">Copy my message</button> <span style="font-size:13px;opacity:.8">Copy it and paste it into an email or message to Geda.</span>';
-    var cb=document.getElementById('copyBtn');
-    if(cb){cb.addEventListener('click',function(){ if(navigator.clipboard){navigator.clipboard.writeText(note); cb.textContent='Copied ✓'; setTimeout(function(){cb.textContent='Copy my message';},2000);} });}
-    box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    box.innerHTML='<strong>Sending your message…</strong>';
+    fetch('https://formsubmit.co/ajax/GedaRealEstate@RoyalLePage.ca',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        name:name,
+        email:email,
+        interest:interest,
+        message:msg,
+        _subject:'New message from gedarealestate.ca'
+      })
+    }).then(function(response){
+      if(!response.ok){ throw new Error('Send failed'); }
+      return response.json().catch(function(){ return {}; });
+    }).then(function(){
+      box.style.display='block';
+      box.innerHTML='<strong>Thank you, '+esc(name.split(' ')[0])+' — your message has been sent. I\'ll reply personally, usually the same or next business day.</strong>';
+      form.reset();
+      box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }).catch(function(){
+      box.style.display='block';
+      box.innerHTML='<strong>Sorry — your message couldn\'t be sent.</strong> Please try again, or email Geda directly at <a href="mailto:GedaRealEstate@RoyalLePage.ca">GedaRealEstate@RoyalLePage.ca</a>.';
+      box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }).finally(function(){
+      if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent=originalBtnText; }
+    });
   });
 })();
 </script>
