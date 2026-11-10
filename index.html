@@ -334,7 +334,7 @@
 </head>
 <body>
 
-<div class="topline">Licensed Real Estate Agent <span>•</span> Royal LePage First Contact Realty, Brokerage — Barrie <span>•</span> <a href="#/contact" data-route="contact">Book a Conversation</a></div>
+<div class="topline">Licensed Real Estate Agent <span>•</span> Royal LePage First Contact Realty, Brokerage — Barrie <span>•</span> <a href="#/contact" data-route="contact" data-to-form="true">Book a Conversation</a></div>
 
 <header>
   <div class="wrap nav">
@@ -521,7 +521,7 @@
           <p>When specialists help — photography, staging, media — I bring them in for that part. But you'll always deal with <strong>me personally</strong>.</p>
 
           <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
-            <a href="#/contact" class="btn btn-red" data-route="contact">Start a Conversation</a>
+            <a href="#/contact" class="btn btn-red" data-route="contact" data-to-form="true">Start a Conversation</a>
             <a href="#/how-i-work" class="btn btn-outline" data-route="work">See How I Work</a>
           </div>
         </div>
@@ -890,7 +890,8 @@
   function fromHash(){ show(HASH2PAGE[location.hash]||'home', false); }
 
   /* Land the visitor directly on the contact form (below the sticky header),
-     used by every CTA that pre-selects an interest — e.g. Free Home Evaluation. */
+     used by every CTA that pre-selects an interest — e.g. Free Home Evaluation —
+     and by conversation CTAs marked data-to-form (Start / Book a Conversation). */
   function scrollToForm(){
     var card=document.querySelector('.form-card');
     if(!card) return;
@@ -918,12 +919,13 @@
     if(!PAGES[key]) return;
     e.preventDefault();
     var interest=a.getAttribute('data-interest');
+    var toForm=a.getAttribute('data-to-form');
     show(key, true);
     if(interest){
       var sel=document.getElementById('interest');
       if(sel){ for(var i=0;i<sel.options.length;i++){ if(sel.options[i].text===interest){ sel.selectedIndex=i; break; } } }
-      if(key==='contact'){ scrollToForm(); }
     }
+    if(key==='contact' && (interest || toForm)){ scrollToForm(); }
   });
 
   window.addEventListener('hashchange', fromHash);
