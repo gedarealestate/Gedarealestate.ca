@@ -887,11 +887,19 @@
     if(push && location.hash!==PAGES[key].hash){ try{ history.pushState({page:key},'',PAGES[key].hash); }catch(e){ location.hash=PAGES[key].hash; } }
   }
 
-  function fromHash(){ show(HASH2PAGE[location.hash]||'home', false); }
+  function fromHash(){
+    var key=HASH2PAGE[location.hash]||'home';
+    show(key, false);
+    /* Arriving at the Contact page by address or back/forward button lands
+       on the form too, same as tapping any contact button. */
+    if(key==='contact'){ scrollToForm(); }
+  }
 
-  /* Land the visitor directly on the contact form (below the sticky header),
-     used by every CTA that pre-selects an interest — e.g. Free Home Evaluation —
-     and by conversation CTAs marked data-to-form (Start / Book a Conversation). */
+  /* Land the visitor directly on the contact form (below the sticky header).
+     Used by EVERY button or link that leads to the contact page — whether it
+     pre-selects an interest (e.g. Free Home Evaluation), is marked data-to-form
+     (Start / Book a Conversation), or is a plain Contact link — so no one ever
+     lands at the top of the Contact page with the form below the fold. */
   function scrollToForm(){
     var card=document.querySelector('.form-card');
     if(!card) return;
@@ -925,7 +933,7 @@
       var sel=document.getElementById('interest');
       if(sel){ for(var i=0;i<sel.options.length;i++){ if(sel.options[i].text===interest){ sel.selectedIndex=i; break; } } }
     }
-    if(key==='contact' && (interest || toForm)){ scrollToForm(); }
+    if(key==='contact'){ scrollToForm(); }
   });
 
   window.addEventListener('hashchange', fromHash);
