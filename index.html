@@ -292,6 +292,8 @@
   .contact-details b{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
   .contact-details a{color:var(--red);font-weight:700}
   .form-card{border:1px solid var(--line);background:var(--card);padding:36px 34px;box-shadow:0 24px 50px rgba(0,0,0,.06)}
+  .form-card.flash{animation:formFlash 1.6s ease}
+  @keyframes formFlash{0%,100%{box-shadow:0 24px 50px rgba(0,0,0,.06)}25%,60%{box-shadow:0 0 0 3px var(--red),0 24px 50px rgba(0,0,0,.06)}}
   @media(max-width:700px){.form-card{padding:26px 20px}}
   .form label{font-size:11.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;display:block;margin:20px 0 8px}
   .form label:first-child{margin-top:0}
@@ -903,6 +905,26 @@
 
   function fromHash(){ show(HASH2PAGE[location.hash]||'home', false); }
 
+  /* Land the visitor directly on the contact form (below the sticky header),
+     used by every CTA that pre-selects an interest — e.g. Free Home Evaluation. */
+  function scrollToForm(){
+    var card=document.querySelector('.form-card');
+    if(!card) return;
+    setTimeout(function(){
+      var y=0, node=card;
+      while(node){ y+=node.offsetTop; node=node.offsetParent; }
+      var header=document.querySelector('header');
+      var hh=header?header.offsetHeight:0;
+      window.scrollTo({top:Math.max(0,y-hh-14), behavior:'smooth'});
+      if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        card.classList.remove('flash');
+        void card.offsetWidth;
+        card.classList.add('flash');
+        setTimeout(function(){ card.classList.remove('flash'); },1700);
+      }
+    },60);
+  }
+
   document.addEventListener('click', function(e){
     var node=e.target;
     var a=null;
@@ -916,6 +938,7 @@
     if(interest){
       var sel=document.getElementById('interest');
       if(sel){ for(var i=0;i<sel.options.length;i++){ if(sel.options[i].text===interest){ sel.selectedIndex=i; break; } } }
+      if(key==='contact'){ scrollToForm(); }
     }
   });
 
